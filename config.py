@@ -5,8 +5,23 @@ EXIT_THRESHOLD = 0.02
 TRANSACTION_COST = 0.01
 SLIPPAGE = 0.005
 
-MODEL_TYPE = "online"   # online or batch
+MODEL_TYPE = "online"
 TASK_TYPE = "regression"
 
 INITIAL_CAPITAL = 100000.0
 POSITION_SIZE = 1
+
+SESSION_SIZE = 200
+MAX_BATCH_SESSIONS = 5
+USE_BATCH_SESSION_FEEDBACK = True
+
+BATCH_HORIZON_K = 5
+
+BATCH_MODEL_TYPE = "xgboost_clf"
+# linear_reg, logistic, xgboost_reg, xgboost_clf, lightgbm_reg, lightgbm_clf
+
+BATCH_TASK_TYPE = "classification"
+# regression or classification
+
+USE_GPU = True
+LIGHTGBM_GPU_BACKEND = "gpu"

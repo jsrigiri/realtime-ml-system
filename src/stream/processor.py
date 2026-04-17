@@ -10,8 +10,20 @@ class StreamProcessor:
         self.prev_features = None
         self.prev_mid = None
 
+        self.prior_batch_metrics = None
+        self.session_records = []
+
+    def set_prior_batch_metrics(self, metrics: dict | None):
+        self.prior_batch_metrics = metrics
+
+    def reset_session_records(self):
+        self.session_records = []
+
     def process_tick(self, tick: dict):
-        features = self.feature_builder.update(tick)
+        features = self.feature_builder.update(
+            tick,
+            prior_batch_metrics=self.prior_batch_metrics
+        )
 
         if features is None:
             return {
@@ -38,10 +50,16 @@ class StreamProcessor:
 
         snap = self.execution_simulator.snapshot(tick["mid"])
 
+        current_record = dict(features)
+        current_record["mid"] = tick["mid"]
+        self.session_records.append(current_record)
+
         if self.prev_features is not None and self.prev_mid is not None:
             realized_target = tick["mid"] - self.prev_mid
             self.metrics_tracker.add_prediction(pred, realized_target)
-            self.model.update(self.prev_features, realized_target)
+
+            if hasattr(self.model, "update"):
+                self.model.update(self.prev_features, realized_target)
 
         self.prev_features = features
         self.prev_mid = tick["mid"]

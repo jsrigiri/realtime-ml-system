@@ -6,3 +6,5 @@ uvicorn==0.44.0
 pytest==9.0.3
 httpx==0.28.1
 joblib==1.5.3
+xgboost==3.2.0
+lightgbm==4.6.0

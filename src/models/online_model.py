@@ -22,10 +22,18 @@ class OnlineRegressor:
             "mom_3",
             "spread",
             "volume_mean",
+            "batch_mse_prev",
+            "batch_mae_prev",
+            "batch_mean_pred_prev",
+            "batch_hit_ratio_prev",
+            "batch_session_pnl_prev",
         ]
 
     def _to_array(self, features: dict):
-        return np.array([[features[name] for name in self.feature_names]], dtype=float)
+        return np.array(
+            [[features.get(name, 0.0) for name in self.feature_names]],
+            dtype=float
+        )
 
     def predict(self, features: dict) -> float:
         X = self._to_array(features)
