@@ -18,23 +18,6 @@ This project implements a **real-time streaming machine learning system** that c
 - Batch learning (session-level retraining)
 - Feedback loop between models
 
-Designed to simulate **production-grade trading systems**, but generalizable to:
-
-- Fraud detection  
-- Recommender systems  
-- IoT streaming analytics  
-
----
-
-## 🧠 Problem Statement
-
-Build a system that:
-
-- Learns from streaming data in real-time  
-- Adapts to regime changes  
-- Uses historical context efficiently  
-- Balances latency vs accuracy  
-
 ---
 
 ## 🏗 Architecture
@@ -76,84 +59,63 @@ Metrics + Feedback Loop
 
 ```text
 streaming-ml-system/
+├── data/
+│   └── historical_ticks.csv
 ├── src/
-│   ├── data/
+│   ├── stream/
+│   │   ├── data_stream.py
+│   │   ├── processor.py
 │   ├── features/
+│   │   ├── online_features.py
 │   ├── models/
+│   │   ├── online_model.py
+│   │   ├── session_batch.py
+│   ├── execution/
+│   │   ├── simulator.py
 │   ├── monitoring/
-├── tests/
+│   │   ├── metrics.py
+│   │   ├── plots.py
+│   ├── utils/
+│       ├── helpers.py
 ├── api/
+│   ├── app.py
 ├── artifacts/
+│   ├── equity_curve.png
+│   ├── pred_vs_realized.png
+│   ├── batch_session_pnl.png
+├── tests/
 ├── main.py
 ├── config.py
+├── requirements.txt
 └── README.md
 ```
 
 ---
 
-## 🧠 Models
-
-### Online Model
-- SGD Regressor (incremental learning)
-
-### Batch Models
-- Linear / Logistic (baseline)
-- XGBoost
-- LightGBM
-
----
-
-## 🔁 Hybrid Learning Strategy
-
-| Component | Role |
-|----------|------|
-| Online Model | Fast adaptation |
-| Batch Model | Deep learning from history |
-| Feedback Loop | Improves next session |
-
----
-
-## ⚡ Key Features
-
-- Real-time prediction  
-- k-step ahead forecasting  
-- Session-based retraining  
-- Multi-model support  
-- GPU fallback  
-- Fully testable  
-
----
-
-## 📈 Performance
+## 📈 Performance Visualization
 
 ### Equity Curve
-(Generated in `artifacts/equity_curve.png`)
+![Equity](artifacts/equity_curve.png)
+
+### Predictions vs Realized
+![Pred vs Realized](artifacts/pred_vs_realized.png)
+
+### Batch Session PnL
+![Batch PnL](artifacts/batch_session_pnl.png)
 
 ---
 
 ## ▶️ How to Run
 
-### 1. Install
-
-```
+```bash
 pip install -r requirements.txt
-```
-
-### 2. Run system
-
-```
 python main.py
-```
-
-### 3. Run tests
-
-```
 pytest -v
 ```
 
-### 4. Run API
+Run API:
 
-```
+```bash
 uvicorn api.app:app --reload
 ```
 
@@ -182,58 +144,18 @@ uvicorn api.app:app --reload
 
 ---
 
-## 🧪 Testing Coverage
+## 🧠 Design Decisions
 
-- Feature pipeline  
-- Online model  
-- Batch model  
-- Integration flow  
-- API endpoints  
-
----
-
-## 🧠 Design Decisions (INTERVIEW GOLD)
-
-### Why Hybrid Learning?
-- Online → fast reaction  
-- Batch → stability  
-
-### Why k-step prediction?
-- More realistic trading horizon  
-- Reduces noise  
-
-### Why session batching?
-- Prevents data leakage  
-- Matches trading sessions  
-
----
-
-## 📊 Benchmark Results
-
-| Model      | Task        | Hit Ratio | PnL |
-|-----------|------------|----------|-----|
-| Linear    | Regression | 0.52     | +120 |
-| XGBoost   | Regression | 0.61     | +1100 |
-| LightGBM  | Classification | 0.59 | +950 |
-
----
-
-## 💡 Why This Project Matters
-
-Demonstrates:
-
-- Streaming ML systems  
-- Hybrid modeling  
-- Production-level design  
-- Real-world constraints  
+- Hybrid learning improves stability vs latency tradeoff  
+- k-step prediction reduces noise  
+- Session batching prevents leakage  
 
 ---
 
 ## 🚀 Future Improvements
 
-- Ensemble models  
-- Reinforcement learning  
 - Kafka streaming  
+- Reinforcement learning  
 - Feature store (Feast)  
 - Docker + Kubernetes  
 
@@ -244,7 +166,6 @@ Demonstrates:
 - Built real-time ML system  
 - Combined online + batch learning  
 - Designed feedback loop architecture  
-- Implemented multi-model system  
 - Production-ready API  
 
 ---

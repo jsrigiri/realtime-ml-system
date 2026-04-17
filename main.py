@@ -1,10 +1,17 @@
 from collections import deque
+import pandas as pd
 
 from src.stream.data_stream import stream_ticks
 from src.features.online_features import OnlineFeatureBuilder
 from src.models.online_model import OnlineRegressor
 from src.execution.simulator import ExecutionSimulator
 from src.monitoring.metrics import MetricsTracker
+from src.monitoring.plots import (
+    ensure_artifacts_dir,
+    plot_equity_curve,
+    plot_predictions_vs_realized,
+    plot_batch_session_pnl,
+)
 from src.stream.processor import StreamProcessor
 from src.models.session_batch import build_session_frame, evaluate_batch_session
 from src.utils.helpers import pretty_float_dict
@@ -17,10 +24,11 @@ from config import (
     SESSION_SIZE,
     MAX_BATCH_SESSIONS,
 )
-from src.monitoring.plots import plot_equity_curve
 
 
 def main():
+    ensure_artifacts_dir()
+
     feature_builder = OnlineFeatureBuilder(window=ROLLING_WINDOW)
     model = OnlineRegressor()
     execution = ExecutionSimulator(
@@ -37,14 +45,20 @@ def main():
     last_result = None
     prior_batch_metrics = None
 
-    # rolling store of recent session dataframes
     recent_session_frames = deque(maxlen=MAX_BATCH_SESSIONS)
+
+    equity_curve = []
+    batch_session_pnls = []
+    batch_session_ids = []
 
     for tick in stream_ticks("data/historical_ticks.csv"):
         processor.set_prior_batch_metrics(prior_batch_metrics)
         result = processor.process_tick(tick)
         last_result = result
         count += 1
+
+        if result["status"] == "ok":
+            equity_curve.append(result["portfolio"]["equity"])
 
         if count % SESSION_SIZE == 0:
             print(f"--- End of session {session_num} ---")
@@ -58,15 +72,20 @@ def main():
                 if len(session_df) > 5:
                     recent_session_frames.append(session_df)
 
-                    combined_df = None
                     if len(recent_session_frames) == 1:
                         combined_df = recent_session_frames[0].copy()
                     else:
-                        import pandas as pd
-                        combined_df = pd.concat(list(recent_session_frames), axis=0, ignore_index=True)
+                        combined_df = pd.concat(
+                            list(recent_session_frames),
+                            axis=0,
+                            ignore_index=True
+                        )
 
                     _, batch_metrics = evaluate_batch_session(combined_df)
                     prior_batch_metrics = batch_metrics
+
+                    batch_session_pnls.append(batch_metrics.get("batch_session_pnl", 0.0))
+                    batch_session_ids.append(session_num)
 
                     print(f"Batch metrics from last {len(recent_session_frames)} session(s):")
                     print(pretty_float_dict(batch_metrics))
@@ -87,8 +106,9 @@ def main():
     print("Metrics:")
     print(pretty_float_dict(metrics.summary()))
 
-    equity_series = metrics.equity_curve  # make sure you store this
-    plot_equity_curve(equity_series)
+    plot_equity_curve(equity_curve)
+    plot_predictions_vs_realized(metrics.predictions, metrics.targets)
+    plot_batch_session_pnl(batch_session_ids, batch_session_pnls)
 
 
 if __name__ == "__main__":
