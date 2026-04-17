@@ -1,32 +1,54 @@
-import time
+from config import ENTRY_THRESHOLD, EXIT_THRESHOLD, POSITION_SIZE
 
 
-class MetricsTracker:
-    def __init__(self):
-        self.prediction_latencies = []
-        self.predictions = []
-        self.targets = []
+class StreamProcessor:
+    def __init__(self, feature_builder, model, execution_simulator, metrics_tracker):
+        self.feature_builder = feature_builder
+        self.model = model
+        self.execution_simulator = execution_simulator
+        self.metrics_tracker = metrics_tracker
+        self.prev_features = None
+        self.prev_mid = None
 
-    def time_call(self, func, *args, **kwargs):
-        start = time.perf_counter()
-        result = func(*args, **kwargs)
-        elapsed = time.perf_counter() - start
-        self.prediction_latencies.append(elapsed)
-        return result
+    def process_tick(self, tick: dict):
+        features = self.feature_builder.update(tick)
 
-    def add_prediction(self, pred: float, target: float):
-        self.predictions.append(float(pred))
-        self.targets.append(float(target))
+        if features is None:
+            return {
+                "status": "warming_up",
+                "tick": tick,
+            }
 
-    def summary(self):
-        avg_latency = sum(self.prediction_latencies) / len(self.prediction_latencies) if self.prediction_latencies else 0.0
+        pred = self.metrics_tracker.time_call(self.model.predict, features)
 
-        mse = 0.0
-        if self.predictions:
-            mse = sum((p - y) ** 2 for p, y in zip(self.predictions, self.targets)) / len(self.predictions)
+        if pred > ENTRY_THRESHOLD:
+            target_position = POSITION_SIZE
+        elif pred < -ENTRY_THRESHOLD:
+            target_position = -POSITION_SIZE
+        elif abs(pred) < EXIT_THRESHOLD:
+            target_position = 0
+        else:
+            target_position = self.execution_simulator.position
+
+        self.execution_simulator.trade_to_target(
+            target_position=target_position,
+            bid=tick["bid"],
+            ask=tick["ask"],
+        )
+
+        snap = self.execution_simulator.snapshot(tick["mid"])
+
+        if self.prev_features is not None and self.prev_mid is not None:
+            realized_target = tick["mid"] - self.prev_mid
+            self.metrics_tracker.add_prediction(pred, realized_target)
+            self.model.update(self.prev_features, realized_target)
+
+        self.prev_features = features
+        self.prev_mid = tick["mid"]
 
         return {
-            "avg_latency_sec": float(avg_latency),
-            "mse": float(mse),
-            "n_predictions": len(self.predictions),
+            "status": "ok",
+            "prediction": float(pred),
+            "features": features,
+            "portfolio": snap,
         }
