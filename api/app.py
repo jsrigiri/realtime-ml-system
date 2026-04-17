@@ -1,46 +1,32 @@
 from fastapi import FastAPI
-from pydantic import BaseModel, Field
+from pydantic import BaseModel
 
 from src.features.online_features import OnlineFeatureBuilder
 from src.models.online_model import OnlineRegressor
-from src.execution.simulator import ExecutionSimulator
-from src.monitoring.metrics import MetricsTracker
-from src.stream.processor import StreamProcessor
-from config import INITIAL_CAPITAL, TRANSACTION_COST, SLIPPAGE, POSITION_SIZE, ROLLING_WINDOW
 
 app = FastAPI()
 
-feature_builder = OnlineFeatureBuilder(window=ROLLING_WINDOW)
+feature_builder = OnlineFeatureBuilder(window=20)
 model = OnlineRegressor()
-execution = ExecutionSimulator(
-    initial_capital=INITIAL_CAPITAL,
-    transaction_cost=TRANSACTION_COST,
-    slippage=SLIPPAGE,
-    position_size=POSITION_SIZE,
-)
-metrics = MetricsTracker()
-processor = StreamProcessor(feature_builder, model, execution, metrics)
 
 
-class TickRequest(BaseModel):
-    mid: float = Field(..., example=100.12)
-    bid: float = Field(..., example=100.11)
-    ask: float = Field(..., example=100.13)
-    volume: float = Field(..., example=5.0)
-
-
-@app.get("/")
-def root():
-    return {"status": "ok", "message": "Use POST /tick or open /docs"}
+class Tick(BaseModel):
+    bid: float
+    ask: float
+    mid: float
+    volume: float
 
 
 @app.post("/tick")
-def process_tick(data: TickRequest):
-    tick = data.dict()
-    result = processor.process_tick(tick)
-    return result
+def process_tick(tick: Tick):
+    features = feature_builder.update(tick.dict())
 
+    if features is None:
+        return {"status": "warming_up"}
 
-@app.get("/metrics")
-def get_metrics():
-    return metrics.summary()
+    pred = model.predict(features)
+
+    return {
+        "prediction": float(pred),
+        "features": features,
+    }

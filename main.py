@@ -17,6 +17,7 @@ from config import (
     SESSION_SIZE,
     MAX_BATCH_SESSIONS,
 )
+from src.monitoring.plots import plot_equity_curve
 
 
 def main():
@@ -85,6 +86,9 @@ def main():
 
     print("Metrics:")
     print(pretty_float_dict(metrics.summary()))
+
+    equity_series = metrics.equity_curve  # make sure you store this
+    plot_equity_curve(equity_series)
 
 
 if __name__ == "__main__":
