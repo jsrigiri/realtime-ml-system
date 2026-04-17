@@ -17,11 +17,20 @@ USE_BATCH_SESSION_FEEDBACK = True
 
 BATCH_HORIZON_K = 5
 
-BATCH_MODEL_TYPE = "xgboost_clf"
+BATCH_MODEL_TYPE = "xgboost_reg"
 # linear_reg, logistic, xgboost_reg, xgboost_clf, lightgbm_reg, lightgbm_clf
 
-BATCH_TASK_TYPE = "classification"
+BATCH_TASK_TYPE = "regression"
 # regression or classification
 
 USE_GPU = True
 LIGHTGBM_GPU_BACKEND = "gpu"
+
+ONLINE_HORIZON = 5
+MIN_WARMUP_TICKS = 50
+
+ENTRY_THRESHOLD = 0.03
+EXIT_THRESHOLD = 0.01
+
+USE_SIGNAL_SMOOTHING = True
+SIGNAL_SMOOTHING_ALPHA = 0.2
