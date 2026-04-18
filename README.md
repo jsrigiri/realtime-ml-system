@@ -1,65 +1,62 @@
-# 🚀 Streaming ML Trading System
+# 🚀 Streaming ML Trading System (Online + Batch + XGBoost + LightGBM + Quant Metrics)
 
 ![Python](https://img.shields.io/badge/Python-3.10+-blue)
-![Streaming](https://img.shields.io/badge/System-Real--Time-orange)
-![Models](https://img.shields.io/badge/Models-Online%20%7C%20Batch-green)
+![ML](https://img.shields.io/badge/Models-Online%20%7C%20Batch-orange)
 ![Boosting](https://img.shields.io/badge/Boosting-XGBoost%20%7C%20LightGBM-yellow)
-![API](https://img.shields.io/badge/API-FastAPI-brightgreen)
+![API](https://img.shields.io/badge/API-FastAPI-green)
 ![Tests](https://img.shields.io/badge/Tests-Pytest-blue)
-![Status](https://img.shields.io/badge/Status-Production--Ready-success)
+![Status](https://img.shields.io/badge/Status-Production--Ready-brightgreen)
 
 ---
 
 ## 📌 Overview
 
-A **production-grade real-time machine learning system** designed for:
+This project implements a **real-time streaming machine learning system** with:
 
-- Streaming prediction
-- Hybrid online + batch learning
-- Quantitative signal evaluation
+- Online learning (tick-level updates)  
+- Batch learning (session-based retraining)  
+- Hybrid model architecture  
+- Quantitative performance evaluation  
 
-This project mimics **HFT-style signal pipelines** with:
+Supports:
 
-- Tick-level processing
-- Execution simulation
-- Continuous learning
-- Advanced performance diagnostics
-
----
-
-## 🧠 Problem
-
-Markets are:
-
-- Noisy  
-- Non-stationary  
-- Latency-sensitive  
-
-We need a system that:
-
-- Adapts in real-time  
-- Learns from history  
-- Controls risk  
-- Maintains predictive edge  
+- Regression → return prediction  
+- Classification → directional prediction  
+- Models:
+  - SGD (online)
+  - XGBoost
+  - LightGBM  
 
 ---
 
-## 🏗 System Architecture
+## 🧠 Problem Statement
+
+Build a system that:
+
+- Processes streaming tick data  
+- Adapts to non-stationary markets  
+- Learns continuously  
+- Generates tradable signals  
+- Evaluates signal quality using quant metrics  
+
+---
+
+## 🏗 Architecture
 
 ```text
 Tick Stream
    ↓
-Feature Engineering (Online)
+Online Feature Engineering
    ↓
-Online Model (Fast Adaptation)
+Online Model (SGD)
    ↓
-Signal Filtering + Smoothing
+Signal Generation
    ↓
-Execution Engine (PnL Simulation)
+Execution Simulator
    ↓
 Session Buffer
    ↓
-Batch Model (XGB/LGBM)
+Batch Model (XGBoost / LightGBM)
    ↓
 Metrics + Feedback Loop
 ```
@@ -68,14 +65,14 @@ Metrics + Feedback Loop
 
 ## ⚙️ Tech Stack
 
-| Layer | Tools |
-|------|------|
-| Data | Pandas, NumPy |
-| Online ML | SGDRegressor |
-| Batch ML | XGBoost, LightGBM |
-| API | FastAPI |
-| Testing | Pytest |
-| Visualization | Matplotlib |
+| Layer              | Tools |
+|-------------------|------|
+| Data Processing    | Pandas, NumPy |
+| Online Learning    | SGDRegressor |
+| Batch Models       | XGBoost, LightGBM |
+| API                | FastAPI |
+| Testing            | Pytest |
+| Visualization      | Matplotlib |
 
 ---
 
@@ -83,25 +80,57 @@ Metrics + Feedback Loop
 
 ```text
 streaming-ml-system/
+├── data/
+│   └── historical_ticks.csv
 ├── src/
 │   ├── stream/
+│   │   ├── data_stream.py
+│   │   ├── processor.py
 │   ├── features/
+│   │   ├── online_features.py
 │   ├── models/
+│   │   ├── online_model.py
+│   │   ├── batch_model.py
 │   ├── execution/
+│   │   ├── simulator.py
 │   ├── monitoring/
+│   │   ├── metrics.py
+│   │   ├── plots.py
 │   ├── utils/
+│       ├── helpers.py
+├── api/
+│   ├── app.py
 ├── artifacts/
 ├── tests/
-├── api/
 ├── main.py
 ├── config.py
+├── requirements.txt
+└── README.md
 ```
 
 ---
 
-## 📈 Performance Metrics (Quant-Grade)
+## 🧠 Models
 
-### Risk & Performance
+### Online Model
+- SGDRegressor / SGDClassifier  
+- Updates every tick  
+- Handles regime shifts  
+
+### Batch Model
+- XGBoost (Regressor / Classifier)  
+- LightGBM (Regressor / Classifier)  
+- Trained on last N sessions  
+
+### Hybrid Logic
+- Online → fast adaptation  
+- Batch → stability + structure  
+
+---
+
+## 📊 Quant Metrics
+
+### Performance Metrics
 - Sharpe Ratio  
 - Max Drawdown  
 - PnL  
@@ -111,119 +140,132 @@ streaming-ml-system/
 - Rank IC  
 - Signal Decay  
 
-### Stability
+### Stability Metrics
 - Rolling IC  
 - IC Half-Life  
 
-### Execution
-- Latency per tick  
-- Trade frequency  
-- Slippage impact  
-
 ---
 
-## 📊 Visualizations
+## 📈 Visualization
 
-- Equity Curve  
-- Prediction vs Realized  
-- Batch PnL  
-- IC Curve  
+Generated via `monitoring/plots.py`:
+
+- Equity curve  
+- Predictions vs realized  
+- Batch session PnL  
+- IC curve  
 - Rolling IC  
 
 ---
 
-## ⚡ Model Design
+## ⚡ Signal Decay
 
-### Online Model
-- Fast, adaptive
-- Handles regime shifts
+Supports:
 
-### Batch Model
-- Learns deeper structure
-- Uses XGBoost / LightGBM
+- n-tick horizon  
+- k-step forward evaluation  
 
-### Hybrid System
-- Online → speed  
-- Batch → stability  
+Measures how predictive power degrades over time.
 
 ---
 
-## 🔥 Key Innovations
+## 🧪 Testing (Pytest)
 
-- Hybrid learning loop  
-- Signal smoothing + filtering  
-- k-step prediction horizon  
-- Session-based retraining  
-- Quant-style evaluation  
+Run:
+
+```bash
+pytest -v
+```
+
+### Coverage
+
+- Data stream  
+- Feature engineering  
+- Models (online + batch)  
+- Metrics  
+- API endpoints  
 
 ---
 
-## ▶️ Run
+## ▶️ How to Run
+
+### 1. Install dependencies
 
 ```bash
 pip install -r requirements.txt
-python main.py
-pytest -v
 ```
 
 ---
 
-## 🧠 Design Tradeoffs
+### 2. Run system
 
-| Problem | Solution |
-|--------|---------|
-| Noise | Smoothing |
-| Overtrading | Thresholding |
-| Regime shifts | Online learning |
-| Overfitting | Batch retraining |
-| Latency | Lightweight models |
+```bash
+python main.py
+```
 
 ---
 
-## 📊 Example Results
+### 3. Run API
 
-| Model | Sharpe | IC | PnL |
-|------|-------|----|-----|
-| Linear | 0.6 | 0.05 | +120 |
-| XGBoost | 1.4 | 0.18 | +1100 |
-| LightGBM | 1.2 | 0.15 | +950 |
+```bash
+python -m uvicorn api.app:app --reload
+```
+
+Open:
+
+```
+http://127.0.0.1:8000/docs
+```
+
+---
+
+## 🔌 API Example
+
+### Request
+
+```json
+{
+  "bid": 100.1,
+  "ask": 100.2,
+  "mid": 100.15,
+  "volume": 5
+}
+```
+
+---
+
+### Response
+
+```json
+{
+  "prediction": 0.0023,
+  "signal": 1
+}
+```
+
+---
+
+## 🔥 Key Highlights
+
+- Real-time streaming ML system  
+- Hybrid online + batch learning  
+- XGBoost & LightGBM integration  
+- Quant-style signal evaluation  
+- Execution simulation  
+- Strong test coverage  
 
 ---
 
 ## 🧠 Talking Points
 
-- Built real-time ML system  
+- Built streaming ML system end-to-end  
 - Designed hybrid learning architecture  
-- Evaluated signal using IC + decay  
-- Modeled trading execution  
+- Evaluated signals using IC + decay  
+- Simulated execution and PnL  
 - Balanced latency vs accuracy  
-
----
-
-## 🚀 Future Work
-
-- Reinforcement learning  
-- Kafka streaming  
-- Feature store  
-- Multi-asset portfolio  
-
----
-
-## 🏆 Why This Stands Out
-
-This is NOT just:
-
-❌ Model training  
-❌ Kaggle-style project  
-
-This IS:
-
-✅ Real-time ML system  
-✅ Quant research framework  
-✅ Production-ready architecture  
 
 ---
 
 ## 📌 Author
 
-Quant + ML + Systems Design Portfolio Project
+Machine Learning + Quant + Systems Design Portfolio Project
