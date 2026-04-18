@@ -12,24 +12,36 @@ class OnlineFeatureBuilder:
         self.mid_prices.append(tick["mid"])
         self.volumes.append(tick["volume"])
 
-        if len(self.mid_prices) < 6:
+        # only need 3 ticks to start producing basic features
+        if len(self.mid_prices) < 3:
             return None
 
         mids = np.array(self.mid_prices, dtype=float)
         rets = np.diff(mids)
 
+        def safe_diff(arr, k):
+            if len(arr) > k:
+                return float(arr[-1] - arr[-(k + 1)])
+            return 0.0
+
+        def safe_zscore(arr, lookback):
+            if len(arr) >= lookback:
+                window = arr[-lookback:]
+                return float((window[-1] - np.mean(window)) / (np.std(window) + 1e-8))
+            return 0.0
+
         features = {
             "mid": float(mids[-1]),
-            "ret_1": float(rets[-1]),
-            "ret_3": float(mids[-1] - mids[-4]),
-            "ret_5": float(mids[-1] - mids[-6]),
-            "ret_mean": float(rets.mean()),
+            "ret_1": float(rets[-1]) if len(rets) >= 1 else 0.0,
+            "ret_3": safe_diff(mids, 3),
+            "ret_5": safe_diff(mids, 5),
+            "ret_mean": float(rets.mean()) if len(rets) >= 1 else 0.0,
             "ret_std": float(rets.std()) if len(rets) > 1 else 0.0,
-            "mom_3": float(mids[-1] - mids[-3]),
-            "mom_5": float(mids[-1] - mids[-5]),
+            "mom_3": safe_diff(mids, 3),
+            "mom_5": safe_diff(mids, 5),
             "spread": float(tick["ask"] - tick["bid"]),
-            "volume_mean": float(np.mean(self.volumes)),
-            "zscore_5": float((mids[-1] - np.mean(mids[-5:])) / (np.std(mids[-5:]) + 1e-8)),
+            "volume_mean": float(np.mean(self.volumes)) if len(self.volumes) > 0 else 0.0,
+            "zscore_5": safe_zscore(mids, 5),
         }
 
         prior_batch_metrics = prior_batch_metrics or {}
