@@ -1,4 +1,4 @@
-# 🚀 Streaming ML Trading System (Final Boss 🚀)
+# 🚀 Streaming ML Trading System
 
 ![Python](https://img.shields.io/badge/Python-3.10+-blue)
 ![Streaming](https://img.shields.io/badge/System-Real--Time-orange)
@@ -190,7 +190,7 @@ pytest -v
 
 ---
 
-## 🧠 Interview Talking Points
+## 🧠 Talking Points
 
 - Built real-time ML system  
 - Designed hybrid learning architecture  
