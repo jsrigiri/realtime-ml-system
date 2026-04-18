@@ -11,6 +11,8 @@ from src.monitoring.plots import (
     plot_equity_curve,
     plot_predictions_vs_realized,
     plot_batch_session_pnl,
+    plot_ic_curve,
+    plot_rolling_ic,
 )
 from src.stream.processor import StreamProcessor
 from src.models.session_batch import build_session_frame, evaluate_batch_session
@@ -103,13 +105,17 @@ def main():
     if last_result and last_result["status"] == "ok":
         print(pretty_float_dict(last_result["portfolio"]))
 
+    summary = metrics.summary()
+
     print("Metrics:")
-    print(pretty_float_dict(metrics.summary()))
+    print(pretty_float_dict(summary))
 
     plot_equity_curve(equity_curve)
     plot_predictions_vs_realized(metrics.predictions, metrics.targets)
     plot_batch_session_pnl(batch_session_ids, batch_session_pnls)
-
+    plot_ic_curve(summary.get("information_coefficient", {}), "artifacts/ic_curve.png", "Information Coefficient")
+    plot_ic_curve(summary.get("rank_information_coefficient", {}), "artifacts/rank_ic_curve.png", "Rank Information Coefficient")
+    plot_rolling_ic(summary.get("rolling_ic_series", []), "artifacts/rolling_ic.png")
 
 if __name__ == "__main__":
     main()

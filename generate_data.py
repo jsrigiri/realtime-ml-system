@@ -4,7 +4,7 @@ from pathlib import Path
 
 np.random.seed(42)
 
-n = 3000
+n = 1380 * 10
 timestamps = pd.date_range("2025-01-01 09:30:00", periods=n, freq="s")
 
 mid = np.zeros(n)

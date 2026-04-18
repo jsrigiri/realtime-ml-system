@@ -67,6 +67,7 @@ class StreamProcessor:
         )
 
         snap = self.execution_simulator.snapshot(tick["mid"])
+        self.metrics_tracker.add_equity(snap["equity"])
 
         current_record = dict(features)
         current_record["mid"] = tick["mid"]
